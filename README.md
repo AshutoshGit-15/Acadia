@@ -1,2 +1,3 @@
-# Acadia
-Acadia Your personal, AI-powered academic assistant. Acadia tames the chaos of your student inbox by unifying Gmail and Google Classroom into one smart dashboard.
+**Acadia** is an AI-powered academic assistant designed to solve the chaos of the modern college experience. It securely connects to a student's scattered information across both Gmail and Google Classroom, automatically parsing and unifying it into a single, smart "Critical Path" dashboard.
+
+This one-page dashboard provides a unified view of upcoming deadlines , a document repository for all academic files , and an alert feed for urgent changes like class cancellations. The system uses AI to auto-categorize every item by course  and features a "Summarize This" button powered by Google's Gemini AI to provide 3-sentence summaries of long professor emails.
