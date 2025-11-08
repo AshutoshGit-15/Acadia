@@ -155,9 +155,9 @@ export default function Landing() {
       <div className="relative z-10 border-t border-white/10 mt-20">
         <div className="max-w-7xl mx-auto px-6 py-8 text-center text-gray-400 text-sm">
           <p>
-            Built with ❤️ for students •{" "}
-            <a href="https://vly.ai" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
-              Powered by vly.ai
+            Built for students •{" "}
+            <a href="Tech Nirvana" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+              Tech Nirvana
             </a>
           </p>
         </div>
