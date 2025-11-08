@@ -416,7 +416,7 @@ let documents = [
   ]}
 ];
 
-let ws = new WebSocket("ws://localhost:8000/mcp/stream");
+let ws = new WebSocket("ws://127.0.0.1:8000/ws/mcp");
 
 ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
@@ -1476,6 +1476,7 @@ function getWeek(date) {
 let mcpSocket = null;
 function connectMCP() {
     mcpSocket = new WebSocket("ws://127.0.0.1:8000/ws/mcp");
+
 
     mcpSocket.onopen = () => {
         console.log("MCP websocket connected ✅");
