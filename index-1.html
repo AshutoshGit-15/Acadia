@@ -359,7 +359,7 @@
 
 <script>
 // -------------------- Mock Data Setup --------------------
-const courses = [
+let courses = [
   {name: "Data Structures & Algorithms", code: "CS201", color: "#4F46E5", instructor: "Prof. Sharma"},
   {name: "Database Management Systems", code: "CS301", color: "#22C55E", instructor: "Dr. Patel"},
   {name: "Operating Systems", code: "CS302", color: "#F59E0B", instructor: "Prof. Kumar"},
@@ -367,7 +367,7 @@ const courses = [
   {name: "Software Engineering", code: "CS304", color: "#8B5CF6", instructor: "Prof. Mehta"}
 ];
 
-const deadlines = [
+let deadlines = [
   {course: "Data Structures & Algorithms", code: "CS201", title: "Assignment 3: Binary Search Trees", due_date: "2025-11-09T23:59:00", priority: "high", description: "Implement BST operations including insertion, deletion, and traversal methods (pre-order, in-order, post-order). Must handle both iterative and recursive approaches for traversal. Submit all code files in a single .zip archive.", type: "assignment"},
   {course: "Database Management Systems", code: "CS301", title: "Project Milestone 2: Schema Design", due_date: "2025-11-10T17:00:00", priority: "high", description: "Submit normalized database schema (up to 3NF) with ER diagram. Include data dictionary and all SQL scripts for table creation.", type: "project"},
   {course: "Operating Systems", code: "CS302", title: "Lab Report: Process Scheduling", due_date: "2025-11-08T10:00:00", priority: "urgent", description: "Analysis of Round Robin vs FCFS scheduling algorithms. Compare turnaround time and waiting time for the given process set. Include graphs and performance metrics.", type: "lab"},
@@ -376,22 +376,22 @@ const deadlines = [
   {course: "Data Structures & Algorithms", code: "CS201", title: "Quiz 4: Graph Algorithms", due_date: "2025-11-13T09:00:00", priority: "low", description: "Online quiz covering DFS, BFS, Dijkstra's algorithm. 20 questions, 30 minutes.", type: "quiz"}
 ];
 
-const alerts = [
+let alerts = [
   {type: "urgent", title: "ROOM CHANGE: Operating Systems Lab", message: "Tomorrow's OS lab has been moved from Lab 3 to Lab 5 (Building B). Please inform your lab partners.", timestamp: "2025-11-07T14:30:00", course: "CS302", keyword: "ROOM CHANGE"},
   {type: "urgent", title: "CANCELLED: Software Engineering Lecture", message: "Friday's SE lecture is cancelled as Prof. Mehta is unwell. Online material will be shared on Classroom. Watch for a make-up session notice.", timestamp: "2025-11-07T11:20:00", course: "CS304", keyword: "CANCELLED"},
   {type: "important", title: "Deadline Extension: DBMS Project", message: "Project Milestone 2 deadline extended by 2 days to Nov 12th due to server issues. This is the final extension.", timestamp: "2025-11-07T09:15:00", course: "CS301", keyword: "DEADLINE EXTENSION"},
 ];
 
-const emails = [
+let emails = [
   {from: "library@college.edu.in", subject: "Overdue Book Reminder", message: "Dear Rahul, this is a reminder that the book 'Advanced Networking Principles' is now 3 days overdue. Please return it by tomorrow to avoid fines.", timestamp: "2025-11-07T10:05:00", type: "email"},
   {from: "Dr. Singh (CS303)", subject: "Mid-term clarification", message: "To clarify, the mid-term will *not* include questions on socket programming implementation, only the theory. Focus on the protocol stacks and addressing schemes.", timestamp: "2025-11-07T13:15:00", type: "email"},
   {from: "tpo@college.edu.in", subject: "Guest Lecture: Industry Expert Session", message: "We are excited to announce a special session on 'The Future of Cloud Computing' by an AWS Solutions Architect. This is mandatory for all 5th sem CSE students. Nov 14, 3 PM, Auditorium.", timestamp: "2025-11-06T16:45:00", type: "email"}
 ];
 
 // Combine alerts and emails into one feed, then sort
-const combinedFeed = [...alerts, ...emails].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+let combinedFeed = [...alerts, ...emails].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-const documents = [
+let documents = [
   {course: "Data Structures & Algorithms", course_code: "CS201", items:[
     {name:"Lecture_Notes_Week8_Trees.pdf",type:"pdf",date:"2025-11-05",size:"2.4 MB"},
     {name:"Assignment3_Instructions.pdf",type:"pdf",date:"2025-11-04",size:"856 KB"},
@@ -416,7 +416,7 @@ const documents = [
   ]}
 ];
 
-const ws = new WebSocket("ws://localhost:8000/mcp/stream");
+let ws = new WebSocket("ws://localhost:8000/mcp/stream");
 
 ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
@@ -435,7 +435,7 @@ ws.onmessage = (event) => {
 };
 
 
-const user_profile = {
+let user_profile = {
   name: "Rahul Verma",
   email: "rahul.verma@college.edu.in",
   avatar_initials: "RV",
@@ -444,7 +444,7 @@ const user_profile = {
   department: "Computer Science & Engineering"
 };
 
-const NOW_TIMESTAMP = new Date("2025-11-07T15:00:00+05:30");
+let NOW_TIMESTAMP = new Date("2025-11-07T15:00:00+05:30");
 let darkMode = false;
 let activeCourseFilter = "All";
 let searchQuery = "";
@@ -1471,6 +1471,43 @@ function getWeek(date) {
   var yearStart = new Date(date.getFullYear(),0,1);
   var weekNo = Math.ceil((((date-yearStart)/86400000)+1)/7);
   return weekNo;
+
+  // ---------------- MCP WebSocket Live Sync ----------------
+let mcpSocket = null;
+function connectMCP() {
+    mcpSocket = new WebSocket("ws://127.0.0.1:8000/ws/mcp");
+
+    mcpSocket.onopen = () => {
+        console.log("MCP websocket connected ✅");
+        mcpSocket.send(JSON.stringify({action:"ping"}));
+    };
+
+    mcpSocket.onmessage = (ev) => {
+        try {
+            const data = JSON.parse(ev.data);
+            if (data.type === "context:update") {
+                console.log("MCP update received");
+
+                // FULL REPLACE MODE
+                deadlines = data.payload.deadlines || [];
+                alerts = data.payload.alerts || [];
+                documents = data.payload.documents || [];
+
+                if(dashboardLoaded) renderDashboard();
+            }
+        } catch(e) {}
+    };
+
+    mcpSocket.onclose = () => {
+        console.log("MCP WS closed. Reconnecting in 4 sec…");
+        setTimeout(connectMCP,4000);
+    };
+}
+
+document.addEventListener("DOMContentLoaded",()=> {
+    connectMCP();
+});
+
 }
 </script>
 <style>
