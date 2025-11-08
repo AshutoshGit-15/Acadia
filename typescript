@@ -1,0 +1,15 @@
+// Frontend: User submits email
+const signIn = useMutation(api.auth.signIn);
+await signIn({ email: "student@university.edu" });
+
+// Backend: OTP sent, user enters code
+// Frontend: Verify OTP
+const verifyOtp = useMutation(api.auth.verifyOtp);
+await verifyOtp({ email: "student@university.edu", code: "123456" });
+
+// Backend: Session created, user authenticated
+// Frontend: useAuth hook now returns isAuthenticated: true
+const { isAuthenticated, user } = useAuth();
+
+// All subsequent queries automatically include user context
+const deadlines = useQuery(api.deadlines.list); // Only returns current user's deadlines
