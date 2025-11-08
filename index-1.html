@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎓 Collegiate Inbox Navigator</title>
+  <meta name="description" content="Your AI academic inbox companion - All your academic emails, assignments & deadlines in one smart dashboard">
+  <link rel="icon" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f393.svg" />
+  <!-- Google Font: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* Reverted to a multi-color theme for clarity */
+      --primary: #4F46E5; /* Indigo */
+      --primary-light: #EEF2FF;
+      --accent: #22C55E;  /* Green */
+      --bg: #F8FAFC;     /* Lighter Gray */
+      --alert: #EF4444;   /* Red */
+      --text: #1F2937;
+      --navbar-bg: #fff;
+      --card-bg: #fff;
+      --nav-radius: 12px;
+      --sidebar-width: 260px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.06);
+      --transition: 0.3s var(--ease-standard);
+      --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+      --success: #22C55E;
+      --gray-light: #F1F5F9; /* Updated Gray */
+      --gray-medium: #94A3B8;
+      --avatar-size: 44px;
+      --gap: 28px;
+      --sidebar-item-h: 44px;
+      --yellow: #F59E0B;
+      --purple: #8B5CF6; /* Purple for AI features */
+      --purple-light: #F5F3FF;
+      --sidebar-collapsed-width: 72px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary: #6366F1;
+        --primary-light: #312E81;
+        --accent: #4ADE80;
+        --bg: #111827; /* Darker BG */
+        --navbar-bg: #1F2937;
+        --card-bg: #1F2937;
+        --text: #F1F5F9;
+        --gray-light: #374151;
+        --gray-medium: #6B7280;
+        --alert: #F87171;
+        --shadow: 0 4px 24px rgba(0,0,0,0.25);
+        --purple: #A78BFA;
+        --purple-light: #3730A3;
+      }
+    }
+    html, body {
+      margin: 0; padding: 0;
+      min-height: 100vh;
+      font-family: "Poppins", "Inter", "Segoe UI", Arial, sans-serif; /* Updated Font */
+      background: var(--bg);
+      color: var(--text);
+      transition: background-color 0.35s;
+    }
+    body.dark {
+      background: #111827;
+      color: #F1F5F9;
+    }
+    /* Animations */
+    .fade-in {
+      animation: fadeIn 0.7s var(--ease-standard);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: none; }
+    }
+    .slide-in-left {
+      animation: slideInLeft 0.4s var(--ease-standard);
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-80px); }
+      to   { opacity: 1; transform: none; }
+    }
+    .slide-in-right {
+      animation: slideInRight 0.4s var(--ease-standard);
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(80px); }
+      to   { opacity: 1; transform: none; }
+    }
+    
+    /* Loading Spinner */
+    .loading-spinner, .loading-dots {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 40px;
+      margin: 10px 0;
+    }
+    .loading-spinner::after {
+      content: "";
+      width: 20px;
+      height: 20px;
+      border: 3px solid var(--primary-light);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    .loading-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--gray-medium);
+      margin: 0 3px;
+      animation: bounce 1.4s infinite both;
+    }
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1.0); }
+    }
+
+    /* Landing/Login Styles */
+    .login-bg {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: #0F172A; /* Dark blue/slate */
+      position: relative;
+      overflow: hidden;
+      perspective: 1000px;
+    }
+    
+    /* Background Gradient Animation */
+    .login-bg::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 50%, #0F172A 100%);
+      background-size: 300% 300%;
+      animation: gradientShift 15s ease infinite;
+      opacity: 0.6;
+    }
+    
+    /* Floating Shapes Animation */
+    .floating-shapes {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .floating-shapes span {
+      position: absolute;
+      display: block;
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      animation: float 25s linear infinite;
+      bottom: -150px;
+    }
+    .floating-shapes span:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+    .floating-shapes span:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+    .floating-shapes span:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+    .floating-shapes span:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+    .floating-shapes span:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+    .floating-shapes span:nth-child(6) { left: 85%; width: 120px; height: 120px; animation-delay: 3s; opacity: 0.05; }
+    .floating-shapes span:nth-child(7) { left: 15%; width: 40px; height: 40px; animation-delay: 7s; }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+    }
+
+    .login-container {
+      background: rgba(30, 41, 59, 0.6); /* Semi-transparent slate */
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      padding: 2.5rem 3rem;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      z-index: 10;
+      transition: transform 0.1s ease;
+    }
+    .login-icon {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      color: var(--purple); /* Updated icon color */
+    }
+    .login-container h1 {
+      margin-bottom: 0.75rem;
+      font-size: 2.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #FFF;
+    }
+    .login-container p {
+      font-size: 1.125rem;
+      margin-bottom: 2.5rem;
+      color: var(--gray-medium);
+      font-weight: 400;
+      line-height: 1.6;
+    }
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75em;
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 12px;
+      border: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 0.85em 1em;
+      cursor: pointer;
+      transition: background 0.22s var(--ease-standard), box-shadow 0.22s var(--ease-standard);
+      width: 100%;
+    }
+    .google-btn:hover {
+      background: #6366F1;
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+    }
+    .google-btn i {
+      font-size: 1.25rem;
+    }
+
+    .features {
+      margin-top: 2.5rem;
+      gap: 1rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .feature {
+      background: rgba(51, 65, 85, 0.5); /* Semi-transparent slate */
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 1.25rem 0.5rem;
+      font-size: 0.9rem;
+      color: #FFF;
+      font-weight: 500;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .feature:hover {
+      background: rgba(71, 85, 105, 0.7);
+      transform: translateY(-5px);
+    }
+    .feature i {
+      font-size: 1.5rem;
+    }
+    .feature .fa-calendar-check { color: #3B82F6; } /* Blue */
+    .feature .fa-file-alt { color: #10B981; } /* Green */
+    .feature .fa-bell { color: #F59E0B; } /* Yellow */
+    .feature .fa-magic { color: #A855F7; } /* Purple */
+
+    @media (max-width: 650px) {
+      .login-container {
+        padding: 2rem 1.5rem;
+        max-width: 100%;
+      }
+      .login-container h1 { font-size: 1.75rem; }
+      .login-container p { font-size: 1rem; }
+      .features {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+      }
+      .feature { padding: 1rem 0.5rem; font-size: 0.85rem; }
+    }
+    
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card-bg);
+      color: var(--primary);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 0.9em 2em;
+      z-index: 9999;
+      font-weight: 600;
+      display: none;
+      opacity: 0;
+      animation: fadeIn 0.4s var(--ease-standard);
+    }
+    .toast.show {
+      display: block;
+      opacity: 1;
+      transition: opacity 0.35s;
+    }
+    /* Dashboard Styles */
+    .dashboard-root {
+      min-height: 100vh;
+      background: var(--bg);
+      transition: background .4s;
+    }
+    .hide {
+      display: none !important;
+    }
+  </style>
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<!-- Floating Shapes for Login BG -->
+<div class="floating-shapes">
+  <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="login-bg fade-in" id="loginBg">
+  <section class="login-container fade-in" id="landingSection">
+      <div class="login-icon"><i class="fas fa-graduation-cap"></i></div>
+      <h1>Welcome to ACADIA</h1>
+      <h2>Collegiate Inbox Navigator</h2>
+      <p>Your AI-powered academic assistant. All deadlines, files, and alerts—in one place.</p>
+      
+      <button class="google-btn" id="googleSignInBtn">
+        <i class="fab fa-google"></i> Sign in with Google
+      </button>
+
+      <div class="features">
+        <div class="feature"><i class="fas fa-calendar-check"></i> Smart Deadlines</div>
+        <div class="feature"><i class="fas fa-file-alt"></i> File Repository</div>
+        <div class="feature"><i class="fas fa-bell"></i> Urgent Alerts</div>
+        <div class="feature"><i class="fas fa-magic"></i> AI Summaries</div> <!-- Updated -->
+      </div>
+  </section>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast"></div>
+
+<!-- Main Dashboard Page (hidden initially) -->
+<div id="dashboardRoot" class="dashboard-root hide"></div>
+
+<script>
+// -------------------- Mock Data Setup --------------------
+const courses = [
+  {name: "Data Structures & Algorithms", code: "CS201", color: "#4F46E5", instructor: "Prof. Sharma"},
+  {name: "Database Management Systems", code: "CS301", color: "#22C55E", instructor: "Dr. Patel"},
+  {name: "Operating Systems", code: "CS302", color: "#F59E0B", instructor: "Prof. Kumar"},
+  {name: "Computer Networks", code: "CS303", color: "#EF4444", instructor: "Dr. Singh"},
+  {name: "Software Engineering", code: "CS304", color: "#8B5CF6", instructor: "Prof. Mehta"}
+];
+
+const deadlines = [
+  {course: "Data Structures & Algorithms", code: "CS201", title: "Assignment 3: Binary Search Trees", due_date: "2025-11-09T23:59:00", priority: "high", description: "Implement BST operations including insertion, deletion, and traversal methods (pre-order, in-order, post-order). Must handle both iterative and recursive approaches for traversal. Submit all code files in a single .zip archive.", type: "assignment"},
+  {course: "Database Management Systems", code: "CS301", title: "Project Milestone 2: Schema Design", due_date: "2025-11-10T17:00:00", priority: "high", description: "Submit normalized database schema (up to 3NF) with ER diagram. Include data dictionary and all SQL scripts for table creation.", type: "project"},
+  {course: "Operating Systems", code: "CS302", title: "Lab Report: Process Scheduling", due_date: "2025-11-08T10:00:00", priority: "urgent", description: "Analysis of Round Robin vs FCFS scheduling algorithms. Compare turnaround time and waiting time for the given process set. Include graphs and performance metrics.", type: "lab"},
+  {course: "Computer Networks", code: "CS303", title: "Mid-term Examination", due_date: "2025-11-12T14:00:00", priority: "medium", description: "Chapters 1-5: Network layers, protocols (TCP/IP, UDP), addressing (IPv4, IPv6), and socket programming basics. Closed book.", type: "exam"},
+  {course: "Software Engineering", code: "CS304", title: "Group Presentation: Agile Methodologies", due_date: "2025-11-11T15:30:00", priority: "medium", description: "20-minute presentation on Scrum framework implementation. All group members must speak. Cover roles, artifacts, and ceremonies.", type: "presentation"},
+  {course: "Data Structures & Algorithms", code: "CS201", title: "Quiz 4: Graph Algorithms", due_date: "2025-11-13T09:00:00", priority: "low", description: "Online quiz covering DFS, BFS, Dijkstra's algorithm. 20 questions, 30 minutes.", type: "quiz"}
+];
+
+const alerts = [
+  {type: "urgent", title: "ROOM CHANGE: Operating Systems Lab", message: "Tomorrow's OS lab has been moved from Lab 3 to Lab 5 (Building B). Please inform your lab partners.", timestamp: "2025-11-07T14:30:00", course: "CS302", keyword: "ROOM CHANGE"},
+  {type: "urgent", title: "CANCELLED: Software Engineering Lecture", message: "Friday's SE lecture is cancelled as Prof. Mehta is unwell. Online material will be shared on Classroom. Watch for a make-up session notice.", timestamp: "2025-11-07T11:20:00", course: "CS304", keyword: "CANCELLED"},
+  {type: "important", title: "Deadline Extension: DBMS Project", message: "Project Milestone 2 deadline extended by 2 days to Nov 12th due to server issues. This is the final extension.", timestamp: "2025-11-07T09:15:00", course: "CS301", keyword: "DEADLINE EXTENSION"},
+];
+
+const emails = [
+  {from: "library@college.edu.in", subject: "Overdue Book Reminder", message: "Dear Rahul, this is a reminder that the book 'Advanced Networking Principles' is now 3 days overdue. Please return it by tomorrow to avoid fines.", timestamp: "2025-11-07T10:05:00", type: "email"},
+  {from: "Dr. Singh (CS303)", subject: "Mid-term clarification", message: "To clarify, the mid-term will *not* include questions on socket programming implementation, only the theory. Focus on the protocol stacks and addressing schemes.", timestamp: "2025-11-07T13:15:00", type: "email"},
+  {from: "tpo@college.edu.in", subject: "Guest Lecture: Industry Expert Session", message: "We are excited to announce a special session on 'The Future of Cloud Computing' by an AWS Solutions Architect. This is mandatory for all 5th sem CSE students. Nov 14, 3 PM, Auditorium.", timestamp: "2025-11-06T16:45:00", type: "email"}
+];
+
+// Combine alerts and emails into one feed, then sort
+const combinedFeed = [...alerts, ...emails].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+const documents = [
+  {course: "Data Structures & Algorithms", course_code: "CS201", items:[
+    {name:"Lecture_Notes_Week8_Trees.pdf",type:"pdf",date:"2025-11-05",size:"2.4 MB"},
+    {name:"Assignment3_Instructions.pdf",type:"pdf",date:"2025-11-04",size:"856 KB"},
+    {name:"Sample_BST_Code.cpp",type:"code",date:"2025-11-03",size:"12 KB"},
+  ]},
+  {course:"Database Management Systems", course_code: "CS301", items:[
+    {name:"Normalization_Tutorial.pptx",type:"pptx",date:"2025-11-06",size:"3.1 MB"},
+    {name:"Project_Rubric.pdf",type:"pdf",date:"2025-11-01",size:"445 KB"},
+    {name:"Sample_ER_Diagram.png",type:"image",date:"2025-10-30",size:"678 KB"},
+  ]},
+  {course:"Operating Systems", course_code: "CS302", items:[
+    {name:"Process_Scheduling_Slides.pdf",type:"pdf",date:"2025-11-02",size:"1.8 MB"},
+    {name:"Lab6_Instructions.docx",type:"docx",date:"2025-11-07",size:"234 KB"},
+  ]},
+  {course:"Computer Networks", course_code: "CS303", items:[
+    {name:"Chapter4_Transport_Layer.pdf",type:"pdf",date:"2025-11-04",size:"4.2 MB"},
+    {name:"Midterm_Topics_List.pdf",type:"pdf",date:"2025-11-06",size:"156 KB"},
+  ]},
+  {course:"Software Engineering", course_code: "CS304", items:[
+    {name:"Agile_vs_Waterfall.pptx",type:"pptx",date:"2025-11-05",size:"2.7 MB"},
+    {name:"Presentation_Guidelines.pdf",type:"pdf",date:"2025-10-28",size:"512 KB"},
+  ]}
+];
+
+const ws = new WebSocket("ws://localhost:8000/mcp/stream");
+
+ws.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+    if(msg.type === "deadlines_update"){
+        deadlinesData = msg.data;
+        renderDeadlines();
+    }
+    if(msg.type === "alerts_update"){
+        alertsData = msg.data;
+        renderAlerts();
+    }
+    if(msg.type === "documents_update"){
+        documentsData = msg.data;
+        renderDocuments();
+    }
+};
+
+
+const user_profile = {
+  name: "Rahul Verma",
+  email: "rahul.verma@college.edu.in",
+  avatar_initials: "RV",
+  student_id: "2023CSE042",
+  semester: "5th Semester",
+  department: "Computer Science & Engineering"
+};
+
+const NOW_TIMESTAMP = new Date("2025-11-07T15:00:00+05:30");
+let darkMode = false;
+let activeCourseFilter = "All";
+let searchQuery = "";
+let dashboardLoaded = false;
+let activeTab = 'Deadlines'; // New state variable for content tabs
+
+// Global timer for search debounce
+let searchDebounceTimer; 
+
+// -------------- Page Transition: Landing → Dashboard --------------
+document.getElementById("googleSignInBtn").addEventListener("click", ()=> {
+  document.getElementById("loginBg").classList.add("hide");
+  document.getElementById("dashboardRoot").classList.remove("hide");
+  if (!dashboardLoaded) {
+    renderDashboard();
+  }
+  dashboardLoaded = true;
+});
+
+// ----------------- 3D Tilt Effect for Login -----------------
+const loginSection = document.getElementById('landingSection');
+if (loginSection) {
+  loginSection.addEventListener('mousemove', (e) => {
+    const { left, top, width, height } = loginSection.getBoundingClientRect();
+    const x = e.clientX - left - width / 2;
+    const y = e.clientY - top - height / 2;
+    
+    const rotateX = (y / height) * -20; // Max rotation 10deg
+    const rotateY = (x / width) * 20; // Max rotation 10deg
+    
+    loginSection.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+  });
+
+  loginSection.addEventListener('mouseleave', () => {
+    loginSection.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+  });
+}
+
+
+// ------ Utility Functions ------
+function formatDate(dateStr) {
+  var date = new Date(dateStr);
+  return date.toLocaleString('en-GB', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+}
+function getCourseColor(code) {
+  let found = courses.find(c=>c.code===code);
+  return found ? found.color : "#556";
+}
+function timeDiffFuture(timeStr) {
+  let due = new Date(timeStr);
+  let ms = due - NOW_TIMESTAMP;
+  if (ms<0) return "Expired";
+  let days = Math.floor(ms/(1000*60*60*24));
+  let hrs = Math.floor((ms%(1000*60*60*24))/(1000*60*60));
+  let mins = Math.floor((ms%(1000*60*60))/(1000*60));
+  if (days>0) return `${days}d ${hrs}h`;
+  if (hrs>0) return `${hrs}h ${mins}m`;
+  return `${mins}min`;
+}
+function getPriorityColor(priority, dueDate) {
+  // Colors: <24h - red, <3d - orange, else green
+  let due = new Date(dueDate);
+  let ms = due - NOW_TIMESTAMP;
+  if (ms < 24*3600000) return 'var(--alert)';
+  if (ms < 3*24*3600000) return 'var(--yellow)';
+  return 'var(--accent)';
+}
+function matchSearch(str) {
+  if (!searchQuery) return true;
+  return str.toLowerCase().includes(searchQuery.toLowerCase());
+}
+
+// ---------------- Toast Notification ------------------
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+  toast.innerText = message;
+  toast.classList.add("show");
+  setTimeout(()=>{ toast.classList.remove("show"); }, 2050);
+}
+
+// ---------------- Gemini API Call ------------------
+/**
+ * Generic function to call the Gemini API.
+ * @param {string} systemPrompt - The system instruction.
+ * @param {string} userPrompt - The user's query.
+ * @param {number} retries - Number of retries for exponential backoff.
+ * @returns {Promise<string>} - The generated text content.
+ */
+async function callGemini(systemPrompt, userPrompt, retries = 3, delay = 1000) {
+  // ⬇️ LOCAL ENVIRONMENT SETUP REQUIRED: Replace 'YOUR_GEMINI_API_KEY' with your actual key 
+  // from Google AI Studio for AI features (Summaries, Breakdowns, Quizzes) to work locally.
+  const apiKey = "AIzaSyD7PHl3dFcPgrmJiWOcEQhSojfYVTGirJ4"; // API key is handled by the environment IF IN CANVAS
+  
+  /*
+  REMOVED API KEY CHECK - The environment will handle the key.
+  if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY") {
+    console.error("Gemini API key is not set. Please update the 'apiKey' variable inside callGemini() function in the script.");
+    showToast("AI features disabled. API key missing.");
+    return "Error: AI feature disabled. Please set your API key.";
+  }
+  */
+
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+  const payload = {
+    contents: [{ parts: [{ text: userPrompt }] }],
+    systemInstruction: {
+      parts: [{ text: systemPrompt }]
+    },
+  };
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    const candidate = result.candidates?.[0];
+    
+    if (candidate && candidate.content?.parts?.[0]?.text) {
+      return candidate.content.parts[0].text;
+    } else {
+      throw new Error("Invalid API response structure.");
+    }
+  } catch (error) {
+    if (retries > 0) {
+      await new Promise(res => setTimeout(res, delay));
+      return callGemini(systemPrompt, userPrompt, retries - 1, delay * 2);
+    } else {
+      console.error("Gemini API call failed after retries:", error);
+      showToast("Error: API request failed.");
+      return "Error: Could not generate a response.";
+    }
+  }
+}
+
+// --- Feature 1: Get AI Summary (for Deadlines & Emails) ---
+async function getGeminiSummary(text, elementId) {
+  const summaryEl = document.getElementById(elementId);
+  if (!summaryEl) return;
+
+  if (!text || text.length < 100) {
+    summaryEl.innerHTML = `<em>Full details:</em><br>${text}`;
+    return;
+  }
+  
+  summaryEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+  
+  const systemPrompt = "You are an expert summarizer. A student needs a quick summary of a message. Summarize the following text in one single, concise sentence. Do not use markdown or lists.";
+  const userPrompt = `Summarize this: "${text}"`;
+  
+  const summaryText = await callGemini(systemPrompt, userPrompt);
+  
+  if (summaryText.startsWith("Error:")) {
+    summaryEl.innerHTML = `<em style="color:var(--alert);">${summaryText}</em>`;
+  } else {
+    summaryEl.innerHTML = `<em>✨ AI Summary:</em><br>${summaryText}`;
+  }
+}
+
+// --- Feature 2: Task Breakdown (for Deadlines) ---
+async function handleTaskBreakdown(index) {
+  const taskListEl = document.getElementById('modalTaskList');
+  if (!taskListEl) return;
+  
+  const d = deadlines[index];
+  if (!d) return;
+
+  taskListEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+
+  const systemPrompt = "You are an expert academic advisor. A student provides a task title and description. Break it down into 3-5 actionable, bite-sized sub-tasks as a checklist. Be encouraging. Respond *only* with the list, using '*' for each item. Example: * Review lecture notes on BSTs.";
+  const userPrompt = `Task: "${d.title}", Description: "${d.description}"`;
+
+  const taskListText = await callGemini(systemPrompt, userPrompt);
+
+  if (taskListText.startsWith("Error:")) {
+    taskListEl.innerHTML = `<em style="color:var(--alert);">${taskListText}</em>`;
+  } else {
+    // Convert markdown list to HTML list
+    const tasks = taskListText.split('*').filter(task => task.trim().length > 0);
+    const listHtml = tasks.map(task => `<li>${task.trim()}</li>`).join('');
+    taskListEl.innerHTML = `<strong>✨ Your Action Plan:</strong><ul>${listHtml}</ul>`;
+  }
+}
+
+// --- Feature 3: Study Quiz (for Documents) ---
+async function handleQuizGeneration(event, courseName) {
+  event.stopPropagation(); // Stop accordion from toggling
+  
+  const docCourse = documents.find(d => d.course === courseName);
+  if (!docCourse) return;
+  
+  const quizPanelEl = document.getElementById(`quiz-panel-${docCourse.course_code}`);
+  if (!quizPanelEl) return;
+
+  // Prevent multiple clicks
+  if (quizPanelEl.innerHTML !== "") {
+    quizPanelEl.classList.toggle('hide');
+    return;
+  }
+  
+  quizPanelEl.classList.remove('hide');
+  quizPanelEl.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+  
+  const docTitles = docCourse.items.map(item => item.name);
+  
+  const systemPrompt = "You are a helpful teaching assistant. Based on the course name and a list of document titles, generate 3 multiple-choice quiz questions to help the student study. Respond *only* with a JSON array of objects, where each object has 'q' (question text), 'o' (array of 3-4 options), and 'a' (index of the correct answer). Example: [{\"q\": \"...\", \"o\": [\"...\", \"...\"], \"a\": 0}]";
+  const userPrompt = `Course: "${courseName}", Documents: ${JSON.stringify(docTitles)}`;
+  
+  const quizJsonText = await callGemini(systemPrompt, userPrompt);
+  
+  if (quizJsonText.startsWith("Error:")) {
+    quizPanelEl.innerHTML = `<em style="color:var(--alert);">${quizJsonText}</em>`;
+    return;
+  }
+
+  try {
+    const quizData = JSON.parse(quizJsonText);
+    let quizHtml = '<strong>✨ Quick Quiz:</strong><div class="quiz-questions">';
+    
+    quizData.forEach((question, qIndex) => {
+      quizHtml += `<div class="quiz-question">
+        <p>${qIndex + 1}. ${question.q}</p>
+        <div class="quiz-options">
+          ${question.o.map((option, oIndex) => `
+            <button class="quiz-option" data-q="${qIndex}" data-a="${question.a == oIndex}">
+              ${option}
+            </button>
+          `).join('')}
+        </div>
+        <div class="quiz-feedback" id="feedback-${qIndex}"></div>
+      </div>`;
+    });
+    
+    quizHtml += '</div>';
+    quizPanelEl.innerHTML = quizHtml;
+    
+    // Add event listeners to the new quiz buttons
+    quizPanelEl.querySelectorAll('.quiz-option').forEach(btn => {
+      btn.onclick = (e) => {
+        const isCorrect = e.target.getAttribute('data-a') === 'true';
+        const qIndex = e.target.getAttribute('data-q');
+        const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+        const parentOptions = e.target.parentElement;
+
+        parentOptions.querySelectorAll('.quiz-option').forEach(b => {
+            b.disabled = true; // Disable all options for this question
+            if (b.getAttribute('data-a') === 'true') {
+                b.style.background = 'var(--accent)';
+                b.style.color = '#fff';
+            }
+        });
+        
+        if (isCorrect) {
+          feedbackEl.innerHTML = 'Correct!';
+          feedbackEl.style.color = 'var(--accent)';
+        } else {
+          e.target.style.background = 'var(--alert)';
+          e.target.style.color = '#fff';
+          feedbackEl.innerHTML = 'Incorrect. The correct answer is highlighted.';
+          feedbackEl.style.color = 'var(--alert)';
+        }
+      };
+    });
+
+  } catch (e) {
+    console.error("Failed to parse quiz JSON:", e, quizJsonText);
+    quizPanelEl.innerHTML = `<em style="color:var(--alert);">Error loading quiz data.</em>`;
+  }
+}
+
+
+// --- Summarize button for Alerts/Emails ---
+async function handleAlertSummary(event, index) {
+  event.stopPropagation();
+  const item = combinedFeed[index];
+  if (!item) return;
+
+  const btn = event.target;
+  btn.innerHTML = '<div class="loading-spinner"></div>';
+  btn.disabled = true;
+  
+  const summaryEl = document.getElementById(`summary-alert-${index}`);
+  if (!summaryEl) return;
+
+  summaryEl.classList.remove('hide');
+  
+  const systemPrompt = "You are an expert summarizer. A student needs a quick summary of an email or alert. Summarize the following text in one single, concise sentence. Do not use markdown or lists.";
+  const userPrompt = `Summarize this: "${item.message}"`;
+  
+  const summaryText = await callGemini(systemPrompt, userPrompt);
+  
+  if (summaryText.startsWith("Error:")) {
+    summaryEl.innerHTML = `<em style="color:var(--alert);">${summaryText}</em>`;
+  } else {
+    summaryEl.innerHTML = `<em>✨ AI Summary:</em><br>${summaryText}`;
+  }
+  
+  btn.classList.add('hide'); // Hide button after summary is shown
+}
+
+// ---------------- Helper for Categorized Deadlines Render --------------------
+
+function renderCategorizedDeadlines(filteredDeadlines) {
+  if (filteredDeadlines.length === 0) return `<div class="info-message">No upcoming deadlines found for this view.</div>`;
+
+  // 1. Define order and group data by type
+  const typeOrder = ["assignment", "project", "exam", "quiz", "lab", "presentation", "other"];
+  const grouped = filteredDeadlines.reduce((acc, d) => {
+    const type = d.type || 'other';
+    if (!acc[type]) acc[type] = [];
+    acc[type].push(d);
+    return acc;
+  }, {});
+
+  // 2. Render HTML
+  let html = '';
+  typeOrder.forEach(type => {
+    if (grouped[type] && grouped[type].length > 0) {
+      const title = type.charAt(0).toUpperCase() + type.slice(1) + 's';
+      const courseCode = grouped[type][0].code;
+      
+      html += `<div class="category-group fade-in">
+        <h3 class="category-title" style="border-left-color:${getCourseColor(courseCode)};">${title} (${grouped[type].length})</h3>
+        <div class="deadlines-grid">
+          ${grouped[type].map(d => deadlineCardRender(d, deadlines.indexOf(d))).join('')}
+        </div>
+      </div>`;
+    }
+  });
+  return html;
+}
+
+// ---------------- Helper for Categorized Alerts/Emails Render --------------------
+
+function renderCategorizedAlerts(filteredCombinedFeed) {
+  if (filteredCombinedFeed.length === 0) return `<div class="info-message">No alerts or emails found for this view.</div>`;
+  
+  // 1. Define order and group data by type
+  const typeOrder = ["urgent", "important", "email", "info", "other"];
+  const grouped = filteredCombinedFeed.reduce((acc, a) => {
+    const type = a.type || 'other';
+    if (!acc[type]) acc[type] = [];
+    acc[type].push(a);
+    return acc;
+  }, {});
+
+  // 2. Render HTML
+  let html = '';
+  typeOrder.forEach(type => {
+    if (grouped[type] && grouped[type].length > 0) {
+      const title = {
+        'urgent': '⚡️ Urgent Alerts',
+        'important': '📌 Important Notices',
+        'email': '📧 General Emails',
+        'info': 'ℹ️ Information/Info',
+        'other': '📦 Other Items'
+      }[type];
+      
+      // Use Alert color for non-emails, Primary for emails
+      const titleColor = type === 'email' ? 'var(--primary)' : 'var(--alert)';
+      
+      html += `<div class="category-group fade-in">
+        <h3 class="category-title" style="border-left-color: ${titleColor};">${title} (${grouped[type].length})</h3>
+        <div class="alerts-feed">
+          ${grouped[type].map(a => alertCardRender(a, combinedFeed.indexOf(a))).join('')}
+        </div>
+      </div>`;
+    }
+  });
+  return html;
+}
+
+// ---------------- Dashboard Render Functions --------------------
+
+// --- Utility to update the navbar tab UI ---
+function updateTabUI(newTab) {
+    document.querySelectorAll('.content-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-tab') === newTab) {
+            btn.classList.add('active');
+        }
+    });
+}
+
+// 1. Renders the fixed structural layout (Navbar, Sidebar, Search Input)
+function renderInitialDashboardLayout() {
+  const root = document.getElementById("dashboardRoot");
+  if (!root) return;
+
+  root.innerHTML = `
+    <nav class="dashboard-navbar slide-in-left">
+      <span id="hamburgerMenuBtn" class="toggle-btn" style="display:none;"><i class="fas fa-bars"></i></span>
+      <div class="nav-left">
+        <span class="navbar-title"><span style="font-size:1.12em;margin-right:6px;">🎓</span>Collegiate Inbox</span>
+      </div>
+      <!-- NAV CENTER: Tabs are now here -->
+      <div class="nav-center">
+        <div class="nav-tabs" id="contentTabs">
+          <button class="content-tab-btn ${activeTab==='Deadlines'?'active':''}" data-tab="Deadlines"><i class="fas fa-calendar-alt"></i> Deadlines</button>
+          <button class="content-tab-btn ${activeTab==='Alerts'?'active':''}" data-tab="Alerts"><i class="fas fa-bell"></i> Alerts & Emails</button>
+          <button class="content-tab-btn ${activeTab==='Documents'?'active':''}" data-tab="Documents"><i class="fas fa-file-alt"></i> Key Documents</button>
+        </div>
+      </div>
+      <!-- NAV RIGHT -->
+      <div class="nav-right">
+        <span id="themeBtn" class="toggle-btn"><i class="fas fa-moon"></i></span>
+        <span id="refreshBtn" class="toggle-btn"><i class="fas fa-sync-alt"></i></span>
+        <span class="user-profile-avatar"><span>${user_profile.avatar_initials}</span></span>
+        <span class="user-profile-name">${user_profile.name.split(' ')[0]}</span>
+      </div>
+    </nav>
+    <main class="dashboard-main slide-in-right">
+      <aside class="dashboard-sidebar" id="sidebar">
+        <div class="sidebar-profile">
+          <div class="avatar-circle">${user_profile.avatar_initials}</div>
+          <div class="sidebar-user-info">
+            <strong>${user_profile.name}</strong>
+            <small>${user_profile.email}</small>
+            <small>${user_profile.semester}, ${user_profile.department}</small>
+          </div>
+        </div>
+        
+        <!-- Filter Section 1: Time Filters -->
+        <div class="sidebar-section sidebar-filters">
+          <strong class="sidebar-title">View By Time</strong>
+          <span class="sidebar-filter-btn${activeCourseFilter==='All'?" active":''}" data-course="All"><i class="fas fa-inbox"></i> All Items</span>
+          <span class="sidebar-filter-btn${activeCourseFilter==='Today'?" active":''}" data-course="Today"><i class="far fa-calendar-day"></i> Today</span>
+          <span class="sidebar-filter-btn${activeCourseFilter==='This Week'?" active":''}" data-course="This Week"><i class="far fa-calendar-week"></i> This Week</span>
+        </div>
+        
+        <!-- Filter Section 2: Subject List Reintroduced -->
+        <div class="sidebar-section sidebar-courses">
+          <strong class="sidebar-title">My Subjects</strong>
+          ${courses.map(c => `
+            <span class="sidebar-filter-btn${activeCourseFilter===c.name?" active":''}" data-course="${c.name}">
+              <span style="color:${c.color};"><i class="fas fa-book-open"></i></span> ${c.name}
+            </span>
+          `).join('')}
+        </div>
+        
+        <div class="sidebar-section sidebar-actions">
+          <span class="sidebar-action-btn"><i class="fas fa-cog"></i> Settings</span>
+          <span class="sidebar-action-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</span>
+        </div>
+      </aside>
+      <section class="dashboard-content" id="dashboardContentArea">
+        <!-- Content will be rendered here by renderDashboardContent() -->
+      </section>
+    </main>
+    <div class="modal-overlay hide" id="summarizeModal"></div>
+    <div class="sidebar-backdrop hide" id="sidebarBackdrop"></div>
+  `;
+  bindDashboardEvents();
+}
+
+// 2. Renders ONLY the dynamic content (Search, Deadlines, Alerts, Documents)
+function renderDashboardContent() {
+  const contentArea = document.getElementById("dashboardContentArea");
+  if (!contentArea) return;
+
+  // Find the course object based on the active filter name
+  let activeCourseObj = courses.find(c => c.name === activeCourseFilter);
+  let activeCourseCode = activeCourseObj ? activeCourseObj.code : '';
+
+  // --- Filtering Deadlines ---
+  const filteredDeadlines = deadlines
+    .filter(item => deadlineFilter(item))
+    .filter(item => matchSearch(`${item.title} ${item.description} ${item.course} ${item.code}`));
+
+  // --- Filtering Alerts & Emails ---
+  const filteredCombinedFeed = combinedFeed
+    .filter(a => alertFilter(a))
+    .filter(a => {
+      // Need a robust search string for alerts/emails
+      const courseName = courses.find(c => c.code === a.course)?.name || '';
+      const searchTarget = `${a.title || a.subject || ''} ${a.message || ''} ${a.keyword || ''} ${a.from || ''} ${a.course || ''} ${courseName}`;
+      return matchSearch(searchTarget);
+    });
+
+  // --- Filtering Documents ---
+  const filteredDocuments = documents
+    .filter(doc => documentFilter(doc))
+    .filter(doc => {
+      // Documents need to check the course name AND all item names
+      const docContent = doc.items.map(item => item.name).join(' ');
+      const searchTarget = `${doc.course} ${doc.course_code} ${docContent}`;
+      return matchSearch(searchTarget);
+    });
+
+  // --- Search-based Tab Switching Logic (The Fix) ---
+  if (searchQuery) {
+      const hasDeadlines = filteredDeadlines.length > 0;
+      const hasAlerts = filteredCombinedFeed.length > 0;
+      const hasDocuments = filteredDocuments.length > 0;
+
+      const currentTabHasResults = (activeTab === 'Deadlines' && hasDeadlines) ||
+                                   (activeTab === 'Alerts' && hasAlerts) ||
+                                   (activeTab === 'Documents' && hasDocuments);
+      
+      // If the current tab has no results AND there are results in another tab, switch the active tab.
+      if (!currentTabHasResults) {
+          let newTab = null;
+          // Priority: Deadlines > Alerts > Documents (Deadlines is usually most critical, but since the user searched for an alert while on deadlines, let's prioritize the Deadlines tab if it has matches, otherwise switch to Alerts)
+          if (hasDeadlines) {
+              newTab = 'Deadlines';
+          } else if (hasAlerts) {
+              newTab = 'Alerts';
+          } else if (hasDocuments) {
+              newTab = 'Documents';
+          }
+
+          if (newTab && newTab !== activeTab) {
+              activeTab = newTab;
+              showToast(`Switching to ${activeTab}: Found matching results.`);
+          }
+      }
+  }
+
+
+  contentArea.innerHTML = `
+    <!-- Search bar -->
+    <div class="search-container">
+      <input id="searchBar" type="text" placeholder="Search emails, deadlines, or course keyword..." value="${searchQuery}" />
+      <span id="clearSearchBtn" class="${searchQuery ? '' : 'hide'}"><i class="fas fa-times-circle"></i></span>
+    </div>
+
+    <div class="content-section deadlines-section ${activeTab!=='Deadlines'?'hide-tab':''}" id="deadlinesSection" data-tab-name="Deadlines">
+      <h2>Upcoming Deadlines</h2>
+      <!-- RENDER CATEGORIZED DEADLINES -->
+      ${renderCategorizedDeadlines(filteredDeadlines)}
+    </div>
+    <div class="content-section alerts-section ${activeTab!=='Alerts'?'hide-tab':''}" id="alertsSection" data-tab-name="Alerts">
+      <h2>Alerts &amp; Emails</h2>
+      <!-- RENDER CATEGORIZED ALERTS/EMAILS -->
+      ${renderCategorizedAlerts(filteredCombinedFeed)}
+    </div>
+    <div class="content-section documents-section ${activeTab!=='Documents'?'hide-tab':''}" id="documentsSection" data-tab-name="Documents">
+      <h2>Key Document Repository</h2>
+      <div class="documents-accordion">
+        ${filteredDocuments.map(documentAccordionRender).join('')}
+      </div>
+    </div>
+  `;
+  
+  // Re-bind content-specific events after content refresh
+  bindSearchBar(); 
+  bindAccordionEvents();
+  bindDeadlineActions();
+  bindAlertActions();
+  updateCountdownTimers(); // Start timers
+
+  // Update the visual appearance of the navbar tabs
+  updateTabUI(activeTab);
+}
+
+// Global render function called on initial load, filter change, or search input
+function renderDashboard() {
+  // 1. Capture state needed for stability before content update
+  const mainContent = document.querySelector('.dashboard-main');
+  const oldScrollTop = mainContent ? mainContent.scrollTop : 0;
+  const oldSearchValue = searchQuery;
+
+  if (!dashboardLoaded) {
+    // Initial Load - Render full structure
+    renderInitialDashboardLayout();
+  }
+  
+  // 2. Render content
+  renderDashboardContent();
+
+  // 3. Restore state after content update
+  const newSb = document.getElementById('searchBar');
+  if (newSb) {
+    newSb.value = oldSearchValue; // Ensure value is correct before focusing
+    // The bindSearchBar function will be called by renderDashboardContent(),
+    // but we need to manually set focus and cursor if the input element exists.
+    newSb.focus();
+    newSb.setSelectionRange(oldSearchValue.length, oldSearchValue.length);
+  }
+  
+  // Restore scroll position
+  if (mainContent) {
+    // This looks weird but ensures the main content container restores its scroll
+    document.querySelector('.dashboard-main').scrollTop = oldScrollTop; 
+  }
+
+  dashboardLoaded = true;
+}
+// ----------------- Dashboard Sub-components Renderers -------------------
+function deadlineFilter(item){
+  // Filters based on sidebar selection
+  if (activeCourseFilter==='All') return true;
+  if (activeCourseFilter==='Today') {
+    let d = new Date(item.due_date);
+    return d.toDateString() === NOW_TIMESTAMP.toDateString();
+  }
+  if (activeCourseFilter==='This Week') {
+    let d = new Date(item.due_date);
+    let nowWeek = getWeek(NOW_TIMESTAMP), dWeek = getWeek(d);
+    return dWeek === nowWeek && d>=NOW_TIMESTAMP;
+  }
+  // Filter by full course name
+  return item.course === activeCourseFilter;
+}
+function alertFilter(alert){
+  if (activeCourseFilter==='All') return true;
+  if (activeCourseFilter==='Today' || activeCourseFilter==='This Week') return true;
+  
+  // Find course object based on the active filter name
+  let courseMatch = courses.find(c => c.name === activeCourseFilter);
+  
+  // For general emails/alerts, if no specific course is required, return true
+  if (alert.course === 'General' || !alert.course) {
+    // If a specific course filter is active, general alerts should be hidden
+    return !courseMatch;
+  }
+
+  // Check if the alert's course code matches the filtered course's code
+  return courseMatch && alert.course === courseMatch.code;
+}
+function documentFilter(doc){
+  if (activeCourseFilter==='All' || activeCourseFilter==='Today' || activeCourseFilter==='This Week') return true;
+  // Filter by full course name
+  return doc.course === activeCourseFilter;
+}
+
+function deadlineCardRender(d,i){
+  const priorityColor = getPriorityColor(d.priority,d.due_date);
+  // 'i' is the original index from the main 'deadlines' array
+  return `<div class="deadline-card card fade-in" data-index="${i}" style="border-top:6px solid ${getCourseColor(d.code)};">
+    <div class="card-head">
+      <span class="course-badge" style="background:${getCourseColor(d.code)};">${d.code}</span>
+      <span class="deadline-title">${d.title}</span>
+    </div>
+    <div class="deadline-date" style="color:${priorityColor}; font-weight:600;">
+      <i class="far fa-clock"></i> <span class="countdown-timer" data-date="${d.due_date}">${timeDiffFuture(d.due_date)}</span> <small style="margin-left:6px;">(${formatDate(d.due_date)})</small>
+    </div>
+    <div class="deadline-desc">${d.description.substring(0, 100)}...</div>
+    <div class="deadline-actions">
+      <button class="cal-btn card-action" data-deadline="${i}"><i class="far fa-calendar-plus"></i> Add to Calendar</button>
+      <button class="summary-btn card-action" data-deadline="${i}"><i class="fas fa-info-circle"></i> View Details</button>
+      <button class="task-breakdown-btn card-action" data-deadline="${i}">✨ Break Down</button>
+    </div>
+    <span class="priority-dot" style="background:${priorityColor};"></span>
+  </div>`;
+}
+
+function alertCardRender(a, index){
+  // Check if it's an email or alert
+  const isEmail = a.type === 'email';
+  const title = isEmail ? a.subject : a.title;
+  const icon = isEmail ? "fas fa-envelope" : (
+    {urgent: "fas fa-exclamation-circle", important: "fas fa-bolt", info: "fas fa-info-circle"}[a.type] || "fas fa-inbox"
+  );
+  const color = isEmail ? 'var(--primary)' : (
+    {urgent:'var(--alert)', important:'var(--purple)', info:'var(--accent)'}[a.type] || 'var(--primary)'
+  );
+  const ackText = isEmail ? "Mark as Read" : "Acknowledge";
+  const showSummaryBtn = a.message.length > 100;
+  
+  const isUrgent = a.type === 'urgent';
+  const displayColor = isUrgent ? 'var(--alert)' : color;
+  const courseCode = a.course || (isEmail ? 'EMAIL' : 'NOTICE');
+  const badgeText = isUrgent ? 'URGENT' : courseCode;
+  const titleColor = isUrgent ? displayColor : 'var(--text)';
+
+
+  return `<div class="alert-card card fade-in" data-index="${index}" style="border-left: 5px solid ${displayColor};">
+    <div class="card-head"> 
+      <span class="course-badge" style="background:${displayColor};">${badgeText}</span>
+      <span class="alert-title" style="color: ${titleColor}; font-weight: ${isUrgent ? 700 : 600};">${title}</span>
+    </div>
+    
+    <div class="alert-body">
+      ${isEmail ? `<small class="alert-from">From: ${a.from}</small>` : ''}
+      <div class="alert-info">${a.message.substring(0, 100)}...</div>
+    </div>
+    
+    <div class="alert-summary hide" id="summary-alert-${index}"></div> <!-- Summary container -->
+    <div class="alert-footer">
+      <div class="alert-footer-left">
+        <span class="alert-icon" style="color:${displayColor}; font-size: 1.25em;"><i class="${icon}"></i></span>
+        <small>${formatDate(a.timestamp)}</small>
+      </div>
+      <div class="alert-footer-actions">
+        ${showSummaryBtn ? `<button class="summarize-alert-btn card-action" onclick="handleAlertSummary(event, ${index})">✨ Summarize</button>` : ''}
+        <button class="alert-action-btn card-action" style="background:${displayColor};color:#fff;">${ackText}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function documentAccordionRender(doc) {
+  // If search query is present, only show document items matching the query
+  const filteredItems = doc.items
+    .filter(item => matchSearch(item.name));
+
+  // Only render the course accordion if there are matching items OR no search query
+  if (searchQuery && filteredItems.length === 0) {
+    return ''; // Hide this course entirely if search filters it out
+  }
+
+  return `<div class="accordion-course">
+    <div class="accordion-header" data-course="${doc.course}">
+      <span class="accordion-header-title">
+        <i class="fas fa-book"></i> <span style="color:${getCourseColor(doc.course_code)}">${doc.course}</span>
+      </span>
+      <button class="quiz-btn card-action" onclick="handleQuizGeneration(event, '${doc.course}')">✨ Study Quiz</button>
+    </div>
+    <div class="accordion-panel hide">
+      <div class="quiz-panel" id="quiz-panel-${doc.course_code}"></div> <!-- NEW Quiz Panel -->
+      <div class="doc-list">
+        ${filteredItems.map(docItemRender).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function docItemRender(item) {
+  let iconMap={pdf:"fas fa-file-pdf",docx:"fas fa-file-word",pptx:"fas fa-file-powerpoint",code:"fas fa-file-code",image:"fas fa-file-image"};
+  let icon = iconMap[item.type]||"fas fa-file-alt";
+  return `<div class="doc-item fade-in">
+    <span class="doc-icon" style="color:var(--primary);"><i class="${icon}"></i></span>
+    <span class="doc-title">${item.name}</span>
+    <span class="doc-date">${item.date}</span>
+    <span class="doc-size">${item.size}</span>
+    <button class="doc-download-btn card-action"><i class="fas fa-download"></i> Download</button>
+  </div>`;
+}
+
+// ----------- Modal Render ------------
+function showSummarizeModal(idx) {
+  let d = deadlines[idx];
+  let modal = document.getElementById("summarizeModal");
+  if (!modal) return;
+  
+  modal.innerHTML = `<div class="modal-content fade-in">
+    <h3><i class="fas fa-calendar-check" style="color:var(--primary);"></i> Deadline Details</h3>
+    <div class="modal-email-info">
+      <strong>${d.title}</strong>
+      <div><span class="course-badge" style="background:${getCourseColor(d.code)};">${d.code}</span>
+        <span style="margin-left:7px;color:${getPriorityColor(d.priority,d.due_date)}; font-weight:600;">Due: ${formatDate(d.due_date)}</span></div>
+    </div>
+    
+    <!-- AI Summary Section -->
+    <div class="modal-summary" id="modalSummarySection">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+    
+    <!-- NEW AI Task Breakdown Section -->
+    <div class="modal-task-list" id="modalTaskList">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+    
+    <div class="modal-actions">
+      <button id="modalCalBtn" data-deadline="${idx}"><i class="far fa-calendar-plus"></i> Add to Calendar</button>
+      <button id="modalCloseBtn">Close</button>
+    </div>
+  </div>`;
+  modal.classList.remove("hide");
+  
+  // Bind modal-specific events
+  document.getElementById('modalCloseBtn').onclick = closeModal;
+  document.getElementById('modalCalBtn').onclick = () => {
+    let idx = document.getElementById('modalCalBtn').getAttribute('data-deadline');
+    addToCalendar(idx);
+  };
+
+  // Trigger AI functions
+  getGeminiSummary(d.description, 'modalSummarySection');
+  handleTaskBreakdown(idx); // NEW call
+}
+
+function closeModal(){
+  let modal = document.getElementById("summarizeModal");
+  if (modal) modal.classList.add("hide");
+}
+
+// --------- Google Calendar Integration ---------
+function addToCalendar(idx){
+  let d = deadlines[idx];
+  if (!d) return;
+
+  // Format dates for Google Calendar (YYYYMMDDTHHMMSSZ)
+  // Assumes due date is the END time. Let's make the event 1 hour long.
+  let endTime = new Date(d.due_date);
+  let startTime = new Date(endTime.getTime() - (60 * 60 * 1000)); // 1 hour before due
+  
+  let formatDateGCal = (date) => date.toISOString().replace(/-|:|\.\d+/g, '');
+  
+  let gcalUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(d.title)}&dates=${formatDateGCal(startTime)}/${formatDateGCal(endTime)}&details=${encodeURIComponent(d.description)}&location=${encodeURIComponent(user_profile.department)}`;
+  
+  window.open(gcalUrl, '_blank');
+  showToast("✓ Added to Google Calendar");
+  closeModal();
+}
+
+// ----------- Countdown Timers ------------
+let countdownInterval;
+function updateCountdownTimers() {
+  if (countdownInterval) clearInterval(countdownInterval);
+  
+  let update = () => {
+    document.querySelectorAll('.countdown-timer').forEach(el=>{
+      let d = el.getAttribute('data-date');
+      el.textContent = timeDiffFuture(d);
+    });
+  };
+  update(); // Run immediately
+  countdownInterval = setInterval(update, 5000); // Then update every 5 sec
+}
+
+// ----------- Sidebar Interaction ------------
+function bindSidebarFilters(){
+  document.querySelectorAll('.sidebar-filter-btn').forEach(btn=>{
+    btn.onclick = function(){
+      activeCourseFilter = btn.getAttribute('data-course');
+      renderDashboard(); // Re-render all content based on filter
+    };
+  });
+}
+
+// ----------- Content Tab Interaction ------------
+function switchTab(tabName) {
+    activeTab = tabName;
+    renderDashboard();
+    showToast(`${tabName} view loaded.`);
+}
+
+function bindContentTabs() {
+  document.querySelectorAll('.content-tab-btn').forEach(btn => {
+    btn.onclick = function() {
+      switchTab(btn.getAttribute('data-tab'));
+    };
+  });
+}
+
+
+// ----------- Document Accordion ------------
+function bindAccordionEvents(){
+  document.querySelectorAll('.accordion-header').forEach(header=>{
+    header.onclick = function(){
+      let panel = header.nextElementSibling;
+      panel.classList.toggle('hide');
+      header.classList.toggle('open');
+    };
+  });
+  // Note: Quiz button binding is now in `documentAccordionRender` because the button has its own click handler
+}
+
+// ----------- Deadline Actions ------------
+function bindDeadlineActions(){
+  document.querySelectorAll('.cal-btn').forEach(btn=>{
+    btn.onclick = function(){
+      let idx = btn.getAttribute('data-deadline');
+      addToCalendar(idx);
+    };
+  });
+  document.querySelectorAll('.summary-btn, .task-breakdown-btn').forEach(btn=>{
+    btn.onclick = function(){
+      let idx = btn.getAttribute('data-deadline');
+      showSummarizeModal(idx);
+    };
+  });
+}
+
+// ------------ Alerts Actions --------------
+function bindAlertActions(){
+  document.querySelectorAll('.alert-action-btn').forEach(btn=>{
+    btn.onclick = function(){
+      const card = btn.closest('.alert-card');
+      const isAcknowledged = card.classList.toggle('acknowledged');
+      
+      if (isAcknowledged) {
+        btn.innerHTML = `<i class="fas fa-check"></i> ${btn.innerText.includes('Read') ? 'Read' : 'Acknowledged'}`;
+        btn.style.opacity = '0.7';
+      } else {
+        btn.innerHTML = btn.innerText.includes('Read') ? 'Mark as Read' : 'Acknowledge';
+        btn.style.opacity = '1';
+      }
+    };
+  });
+  // Note: Summarize button binding is now inline in `alertCardRender`
+}
+
+// ------ Search Bar Functionality ------
+function bindSearchBar(){
+  let sb = document.getElementById('searchBar');
+  let clearBtn = document.getElementById('clearSearchBtn');
+  if (!sb || !clearBtn) return;
+  
+  // Debounced function to call renderDashboard
+  const debouncedRender = () => {
+    // We only call renderDashboard after the user stops typing
+    renderDashboard();
+  };
+
+  sb.oninput = function(){
+    searchQuery = sb.value.trim();
+    if (searchQuery) {
+      clearBtn.classList.remove('hide');
+    } else {
+      clearBtn.classList.add('hide');
+    }
+    
+    // Clear previous timer (debounce)
+    if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+    }
+    // Set a new timer for 300ms
+    searchDebounceTimer = setTimeout(debouncedRender, 300);
+  };
+  
+  clearBtn.onclick = function(){
+    searchQuery = ""; sb.value = ""; 
+    renderDashboard();
+    clearBtn.classList.add("hide");
+  };
+}
+
+// ------ Navbar Buttons ------
+function bindNavbarButtons(){
+  let themeBtn = document.getElementById('themeBtn');
+  if (themeBtn) {
+    themeBtn.onclick = function(){
+      darkMode = !darkMode;
+      document.body.classList.toggle('dark', darkMode);
+      showToast(darkMode ? "Dark Mode Enabled" : "Light Mode Enabled");
+      // Update icon
+      themeBtn.innerHTML = darkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    };
+    // Set initial icon
+    themeBtn.innerHTML = darkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+  }
+  
+  let refreshBtn = document.getElementById("refreshBtn");
+  if (refreshBtn) {
+    refreshBtn.onclick = function(){
+      showToast("Dashboard refreshed");
+      // Add rotation class on click
+      refreshBtn.classList.add('rotate-animate');
+      setTimeout(() => refreshBtn.classList.remove('rotate-animate'), 500);
+      renderDashboard();
+    };
+  }
+}
+
+// --- Logout Functionality ---
+function bindLogout(){
+  let logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.onclick = function(){
+      document.getElementById("dashboardRoot").classList.add("hide");
+      document.getElementById("loginBg").classList.remove("hide");
+      dashboardLoaded = false;
+      darkMode = false;
+      document.body.classList.remove("dark");
+      searchQuery = "";
+      activeCourseFilter = "All";
+      activeTab = 'Deadlines'; // Reset tab state on logout
+    };
+  }
+}
+
+// --- Mobile Sidebar ---
+function bindMobileSidebar() {
+  var sidebar = document.getElementById('sidebar');
+  var backdrop = document.getElementById('sidebarBackdrop');
+  var hamburger = document.getElementById('hamburgerMenuBtn');
+  
+  if(!sidebar||!backdrop||!hamburger) {
+    return;
+  }
+  
+  hamburger.style.display = 'inline-block'; // Show on mobile
+  
+  hamburger.onclick = function(){
+    sidebar.classList.add('open');
+    backdrop.classList.remove('hide');
+  };
+  backdrop.onclick = function(){
+    sidebar.classList.remove('open');
+    backdrop.classList.add('hide');
+  };
+}
+
+// ------- Modal Overlay Click -------
+function bindModalEvents(){
+  let modal = document.getElementById("summarizeModal");
+  if (modal) {
+    modal.onclick = function(e){
+      if (e.target === this) closeModal();
+    };
+  }
+}
+
+// ------------ Bind All Dashboard Events ------------
+function bindDashboardEvents() {
+  bindSidebarFilters();
+  bindContentTabs(); 
+  bindAccordionEvents();
+  bindDeadlineActions();
+  bindAlertActions();
+  // bindSearchBar is now handled via renderDashboardContent which is called by renderDashboard
+  bindNavbarButtons();
+  bindLogout();
+  bindModalEvents();
+  bindMobileSidebar(); 
+}
+
+// --- Utility: get week number in year ---
+function getWeek(date) {
+  date = new Date(date.valueOf());
+  date.setHours(0,0,0,0);
+  date.setDate(date.getDate() + 4 - (date.getDay()||7));
+  var yearStart = new Date(date.getFullYear(),0,1);
+  var weekNo = Math.ceil((((date-yearStart)/86400000)+1)/7);
+  return weekNo;
+}
+</script>
+<style>
+/* NAVBAR */
+.dashboard-navbar {
+  background: var(--navbar-bg);
+  box-shadow: var(--shadow);
+  /* REMOVED: border-radius: var(--nav-radius); */
+  padding: 0.7em 2em;
+  min-height: 63px;
+  display: flex;
+  gap: var(--gap);
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0; /* Changed from 10px */
+  z-index: 98;
+  margin: 0; /* Changed from 10px */
+  width: 100%; /* Changed from calc(100% - 20px) */
+  box-sizing: border-box;
+  /* Added border for separation */
+  border-bottom: 1px solid var(--gray-light);
+}
+.navbar-title {
+  font-weight: 600; font-size: 1.2rem; letter-spacing: -0.02em;
+  color: var(--text);
+}
+/* Updated NAV CENTER for Tabs */
+.nav-center { 
+  flex: 1; 
+  display: flex; 
+  justify-content: center; 
+  min-width: 400px; /* Ensure space for tabs */
+}
+.nav-right { display: flex; align-items: center; gap: 0.5rem; }
+.toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-light);
+  color: var(--gray-medium);
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.toggle-btn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  transform: scale(1.05);
+}
+/* Enhanced Refresh Button */
+#refreshBtn:hover {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+.rotate-animate {
+  animation: rotate 0.5s ease-out;
+}
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Enhanced User Profile Avatar */
+.user-profile-avatar {
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%); /* Gradient background */
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 1.12em;
+  margin-right: 4px;
+  box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3); /* Subtle shadow */
+  border: 2px solid var(--navbar-bg); /* White border to lift it */
+  transition: transform 0.2s ease-out;
+}
+.user-profile-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+}
+
+.user-profile-name {
+  font-weight: 600;color: var(--text);font-size: 1.05em;margin-right: 1.1em;
+  letter-spacing:-.01em;
+}
+/* SIDEBAR */
+.dashboard-sidebar {
+  background: var(--navbar-bg);
+  min-width: var(--sidebar-width);
+  max-width: var(--sidebar-width);
+  padding: 1.5em 1.2em;
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column;
+  gap: 1.5em; 
+  height: calc(100vh - 110px); /* Adjusted height */
+  position: sticky; 
+  top: 75px; /* Adjusted to clear the full-width navbar */
+  left: 0;
+}
+.sidebar-profile {
+  display:flex;align-items: center;gap:0.8em;
+  padding-bottom: 1em;
+  border-bottom: 1px solid var(--gray-light);
+}
+.avatar-circle {
+  width: 48px;height: 48px;border-radius: 50%;background: var(--primary);color: #fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.25em;
+  flex-shrink: 0;
+}
+.sidebar-user-info { 
+  font-size: 0.9em; 
+  display: flex; 
+  flex-direction: column; 
+  overflow: hidden;
+}
+.sidebar-user-info strong {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-user-info small {
+  color: var(--gray-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-section {
+  gap: 0.25em; display: flex; flex-direction: column;
+}
+.sidebar-title {
+    font-size: 0.9em;
+    font-weight: 700;
+    color: var(--gray-medium);
+    text-transform: uppercase;
+    margin: 5px 0 5px 0;
+}
+.sidebar-filter-btn {
+  /* CRITICAL FIX: Set width to 100% to fill the sidebar content area */
+  width: 100%; 
+  cursor:pointer;
+  padding:0.7em 1em; min-height:var(--sidebar-item-h);
+  font-weight:500;font-size:0.95em;
+  border-radius: 10px;
+  background: none;border: none;
+  transition: background 0.17s, color 0.17s;
+  margin-bottom:3px;
+  color:var(--text);
+  display:flex; 
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  box-sizing: border-box; /* Ensure padding doesn't push it wider than 100% */
+}
+.sidebar-filter-btn i {
+    font-size: 1.1em;
+    min-width: 20px; /* Ensure consistent alignment */
+}
+.sidebar-filter-btn.active {
+  background: var(--primary-light); 
+  color: var(--primary);
+  font-weight:600;
+}
+.sidebar-filter-btn.active span {
+    color: var(--primary) !important; /* Force color on active state icon */
+}
+.sidebar-filter-btn:hover {
+  background: var(--gray-light);
+}
+.sidebar-actions { margin-top: auto; padding-top: 1em; border-top: 1px solid var(--gray-light); gap:0.25em; }
+.sidebar-action-btn {
+  display:flex;align-items:center;gap:0.6em;font-size:1em;cursor:pointer;
+  padding:0.6em 1em;border-radius:9px;background:none;border:none;
+  color: var(--gray-medium);font-weight:500;transition:background .18s, color .18s;
+}
+.sidebar-action-btn:hover {
+  background: var(--gray-light);
+  color: var(--text);
+}
+#logoutBtn:hover {
+  background: var(--alert);
+  color: #fff;
+}
+
+/* MAIN DASHBOARD */
+.dashboard-main {
+  display: flex; flex-direction: row; gap: var(--gap);
+  align-items: flex-start; justify-content: stretch;
+  padding: 0 1.8em 2.7em 1.8em;
+  margin-left: 10px; /* Align with sidebar/content spacing */
+  margin-right: 10px; /* Align with sidebar/content spacing */
+  margin-top: 75px; /* Adjusted to clear the unified navbar */
+  overflow-y: auto; /* IMPORTANT: This is the main scrolling container */
+}
+.dashboard-content {
+  flex: 1; display: flex; flex-direction: column; gap: var(--gap);
+  min-width: 0; /* Prevents flex overflow */
+}
+/* NEW: Tabs Inside Navbar */
+.nav-tabs {
+  display: flex;
+  gap: 10px;
+  padding: 0;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+.content-tab-btn {
+  background: none;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--gray-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.content-tab-btn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.content-tab-btn.active {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 3px 8px rgba(79, 70, 229, 0.2);
+}
+.content-tab-btn.active:hover {
+  background: var(--primary);
+  color: #fff;
+}
+.content-section.hide-tab {
+    display: none !important;
+}
+
+/* NEW: Search Bar container (moved from navbar) */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto 1.5rem auto;
+}
+.search-container #searchBar {
+  width: 100%; 
+  padding: 10px 40px 10px 18px; /* Added right padding for clear button */
+  border-radius: 12px;
+  border: 1.6px solid var(--gray-light);
+  font-size: 1rem;
+  background: var(--card-bg); /* Use card background for search box */
+  color: var(--text);
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color .21s var(--ease-standard), box-shadow .21s;
+}
+.search-container #searchBar:focus { 
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+.search-container #clearSearchBtn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 1.05em;
+    color: var(--gray-medium);
+    transition: color 0.15s;
+}
+.search-container #clearSearchBtn:hover { color: var(--alert); }
+
+.content-section {
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+  border-radius: 18px;
+  padding: 1.4em 1.6em 1.8em 1.6em;
+  margin-bottom: 0;
+}
+.content-section h2 {
+  font-size:1.3em;
+  font-weight: 600;
+  margin-bottom:1.1em;color:var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.content-section h2 i {
+  display: none; /* Hide icons in h2 since tabs have them */
+}
+
+/* NEW CATEGORY STYLES */
+.category-group {
+    margin-bottom: 2.5em; /* Space between categories */
+    border-top: 1px solid var(--gray-light);
+    padding-top: 1.5em;
+}
+.category-group:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+.category-title {
+    font-size: 1.15em;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 1.2em 0;
+    padding-left: 12px;
+    border-left: 4px solid var(--primary); /* Dynamic accent */
+    line-height: 1.2;
+}
+.info-message {
+    padding: 1.5em;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 12px;
+    font-weight: 500;
+    text-align: center;
+}
+/* END NEW CATEGORY STYLES */
+
+.deadlines-grid {
+  display:grid;grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));gap: var(--gap);
+}
+.deadline-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding:1.2em 1.3em; /* Standardized Padding */
+  position:relative;
+  transition: box-shadow .21s, transform .21s, var(--transition);
+  display:flex;flex-direction:column;gap:0.7em;
+  border: 1px solid var(--gray-light);
+}
+.deadline-card:hover {
+  box-shadow: 0 8px 28px rgba(79,70,229,0.13);transform:translateY(-4px);
+}
+.card-head {
+  display:flex;align-items:center;gap:0.7em;margin-bottom:4px;
+}
+.course-badge {
+  background: var(--primary);color:#fff;padding:0.26em 1em;border-radius: 9px;font-weight:600;font-size:0.9rem;
+  letter-spacing:-.01em;
+  flex-shrink: 0;
+}
+.deadline-title { font-weight:600; font-size:1.08em;color:var(--text); line-height: 1.4; }
+.deadline-date {font-size: 0.97em; margin-top:2px; font-weight: 500;}
+.deadline-desc { 
+  margin-top:3px; margin-bottom:2px; color:var(--gray-medium); font-size:0.95em;
+  line-height: 1.5;
+}
+.deadline-actions {
+  display:flex;gap:0.54em;margin-top:8px; flex-wrap: wrap;
+}
+.card-action {
+  background: var(--gray-light);
+  color: var(--gray-medium);
+  border: none;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size:0.9rem;
+  cursor: pointer;
+  padding: 0.55em 1em;
+  transition: background 0.19s, color 0.19s, var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+.card-action:hover { background: var(--primary); color: #fff; }
+
+/* AI Feature Button Styles */
+.task-breakdown-btn {
+  background: var(--purple-light);
+  color: var(--purple);
+}
+.task-breakdown-btn:hover {
+  background: var(--purple);
+  color: #fff;
+}
+.summarize-alert-btn {
+  background: var(--purple-light);
+  color: var(--purple);
+  padding: 0.45em 0.8em;
+  font-size: 0.85rem;
+}
+.summarize-alert-btn:hover {
+  background: var(--purple);
+  color: #fff;
+}
+.summarize-alert-btn .loading-spinner::after {
+  width: 12px; height: 12px; border-width: 2px;
+}
+
+.priority-dot {
+  position:absolute;top:15px;right:15px;width:11px;height:11px;border-radius:50%;display:inline-block;
+  border: 1px solid var(--card-bg);
+}
+/* Alerts Section */
+.alerts-feed {
+  display:flex;flex-direction:column;gap:15px;padding: 2px 10px 2px 2px;
+}
+.alert-card {
+  background: var(--card-bg); 
+  border-radius: 16px; 
+  box-shadow: var(--shadow); 
+  padding: 1.2em 1.3em; /* Standardized Padding */
+  display:flex;
+  flex-direction:column;
+  gap:0.7em; /* Matched gap from deadline-card */
+  border: 1px solid var(--gray-light); 
+  border-left: 5px solid var(--primary);
+  transition: box-shadow .21s, transform .21s, var(--transition); /* Added hover transition */
+}
+.alert-card:hover { /* Added hover effect */
+  box-shadow: 0 8px 28px rgba(79,70,229,0.13);transform:translateY(-4px);
+}
+.alert-card.acknowledged {
+  opacity: 0.6;
+  transform: scale(0.98);
+}
+.alert-card.acknowledged .alert-title,
+.alert-card.acknowledged .alert-info {
+  text-decoration: line-through;
+}
+/* Specific styles for Urgent Alerts */
+.alert-card[data-alert-type="urgent"] {
+    border-left: 5px solid var(--alert) !important; /* Strong red border */
+}
+
+.alert-icon {font-size:1.18em;margin-right:7px;vertical-align:-2px;}
+.alert-title {font-weight:600;font-size:1.05em;}
+.alert-from {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--gray-medium);
+  margin: -2px 0 4px 30px;
+}
+.alert-info {color: var(--gray-medium);font-size:0.95em; margin-left:0; line-height: 1.5;} /* Removed margin-left:30px */
+.alert-summary {
+  font-size: 0.95em;
+  margin-left: 0; /* Adjusted for new card structure */
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--purple-light);
+  color: var(--purple);
+  font-weight: 500;
+}
+.alert-summary em { font-style: normal; }
+
+.alert-footer {
+  margin-top:10px;display:flex;align-items:center;justify-content: space-between;
+  gap:0.5em; padding-left: 0; /* Removed padding-left: 30px; */
+}
+.alert-footer-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.alert-footer small { color: var(--gray-medium); font-size: 0.9em; }
+.alert-footer-actions { display: flex; gap: 0.5em; }
+.alert-action-btn {
+  background:var(--primary);color:#fff;border-radius:8px;border:none;padding:0.42em 1em;font-weight:600;
+  cursor:pointer;font-size:0.9rem;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05);
+  transition:background .17s, opacity .17s;
+}
+.alert-action-btn:hover {background:var(--accent);}
+
+/* Documents Accordion */
+.documents-accordion {margin-top:13px; display: flex; flex-direction: column; gap: 9px;}
+.accordion-course {border: 1px solid var(--gray-light); border-radius: 12px;}
+.accordion-header {
+  background: var(--card-bg); 
+  cursor:pointer; font-size:1.05em;color:var(--text);font-weight:600;padding:0.8em 1.2em;
+  border-radius:11px;
+  display:flex;align-items:center;gap:0.7em;
+  transition: background 0.2s;
+}
+.accordion-header:hover { background: var(--gray-light); }
+.accordion-header.open { 
+  background: var(--primary-light); 
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.accordion-header-title { flex: 1; display: flex; align-items: center; gap: 0.7em;}
+.quiz-btn {
+  background: var(--purple-light);
+  color: var(--purple);
+  font-size: 0.9rem;
+}
+.quiz-btn:hover {
+  background: var(--purple);
+  color: #fff;
+}
+.accordion-panel {
+  padding:1em 1.2em 1.2em 1.2em; 
+  border-top: 1px solid var(--gray-light);
+  background: var(--card-bg);
+  border-radius: 0 0 11px 11px;
+}
+/* NEW Quiz Panel Styles */
+.quiz-panel {
+  padding: 1em;
+  background: var(--gray-light);
+  border-radius: 10px;
+  margin-bottom: 1em;
+}
+.quiz-panel strong { color: var(--purple); }
+.quiz-question {
+  margin-top: 0.75em;
+  font-size: 0.95em;
+}
+.quiz-question p { margin: 0 0 0.5em 0; font-weight: 500; }
+.quiz-options { display: flex; flex-direction: column; gap: 0.5em; }
+.quiz-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--gray-light);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.6em 1em;
+  transition: background 0.19s, color 0.19s, border-color 0.19s;
+}
+.quiz-option:hover:not(:disabled) {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.quiz-option:disabled { cursor: not-allowed; opacity: 0.9; }
+.quiz-feedback {
+  font-size: 0.9em;
+  font-weight: 600;
+  margin-top: 0.5em;
+}
+
+.doc-list { display: flex; flex-direction: column; gap: 10px; }
+.doc-item {
+  display:flex;align-items:center;gap:0.85em;padding:0.72em 1em;font-size:1.01em;background:var(--bg);
+  border-radius:9px;box-shadow: 0 1px 6px rgba(0,0,0,0.03);
+  border: 1px solid var(--gray-light);
+}
+.doc-icon { font-size:1.22em; color: var(--primary); }
+.doc-title { flex:1;font-weight:500;color:var(--text); }
+.doc-date { margin-left:12px;color:var(--gray-medium);min-width:78px;font-size:0.97em; }
+.doc-size { margin-left:11px;color:var(--gray-medium);font-size:0.96em; }
+.doc-download-btn {
+  background: var(--accent); color: #fff; border:none; border-radius:7px; font-size:0.9rem;padding:0.45em 0.92em; font-weight:600; cursor:pointer;
+  transition:background .18s;
+}
+.doc-download-btn:hover {background:var(--primary);}
+
+/* MODAL */
+.modal-overlay {
+  position:fixed;z-index:100;background:rgba(18,19,23,0.41);top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;
+  backdrop-filter: blur(3px);
+  padding: 1rem;
+}
+.modal-content {
+  background: var(--card-bg); border-radius:20px; box-shadow: var(--shadow); padding:1.5em 2em 2em 2em; max-width:550px; width: 100%;
+  display:flex;flex-direction:column;align-items:stretch;gap:12px; animation: fadeIn .44s;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 0.5em;
+}
+.modal-email-info {
+  font-size: 1em; color: var(--text); font-weight:600; margin-bottom:8px;
+}
+.modal-email-info strong { font-size: 1.1em; }
+.modal-email-info div { margin-top: 0.5em; }
+
+.modal-summary, .modal-task-list {
+  background: var(--gray-light); border-radius:10px; padding:12px 15px; font-size:0.97em; color: var(--text); margin-bottom:4px;
+}
+.modal-summary em, .modal-task-list strong {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--primary);
+  display: block;
+  margin-bottom: 5px;
+}
+.modal-task-list strong {
+  color: var(--purple);
+}
+.modal-task-list ul {
+  padding-left: 20px;
+  margin: 5px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.modal-task-list li {
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display:flex;gap:0.77em;margin-top:12px;
+  border-top: 1px solid var(--gray-light);
+  padding-top: 1em;
+}
+.modal-actions button {
+  background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:1em;padding:0.6em 1.2em;font-weight:600;cursor:pointer;transition:background .19s;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.modal-actions button:hover {background:var(--accent);}
+.modal-actions button#modalCloseBtn {
+  background: var(--gray-light);
+  color: var(--gray-medium);
+  margin-left: auto;
+}
+.modal-actions button#modalCloseBtn:hover {
+  background: var(--gray-medium);
+  color: #fff;
+}
+
+/* SIDEBAR MOBILE / RESPONSIVE */
+@media (max-width:1024px){
+  .dashboard-main { 
+    gap:19px; 
+    padding: 0 1em 2.2em 1em;
+    margin: 0;
+    margin-top: 75px; /* Adjusted top margin for mobile navbar height */
+    flex-direction: column;
+  }
+  .dashboard-navbar { 
+    padding:0.7em 1em; gap:14px; 
+    position: sticky;
+    top: 0;
+    margin: 0;
+    width: 100%;
+    border-radius: 0;
+  }
+  .dashboard-sidebar { 
+    position:fixed; 
+    left:-300px; 
+    top: 60px; /* Height of navbar */
+    min-width:var(--sidebar-width);
+    max-width:var(--sidebar-width); 
+    height:calc(100vh - 60px); 
+    z-index:110;
+    transition:left .32s var(--ease-standard);
+    border-radius: 0;
+  }
+  .dashboard-sidebar.open { left:0; }
+  .sidebar-backdrop {
+    display:block;
+    position:fixed;
+    z-index:100;
+    top: 60px;
+    left:0;
+    width:100vw;
+    height:calc(100vh - 60px);
+    background:rgba(30,32,44,0.3);
+  }
+  .dashboard-content {margin-left:0;}
+  
+  .nav-center { display: none; } /* Hide tabs on small screens to prevent clutter */
+  #hamburgerMenuBtn { display: inline-flex !important; }
+  .search-container { margin-top: 10px; } /* Add margin below content tabs on mobile */
+}
+@media (max-width:500px) {
+  .dashboard-navbar { gap:6px; padding:7px 9px 7px 9px; min-height: 60px; }
+  .navbar-title { font-size:1.1rem; }
+  .nav-right { gap: 0.25rem; }
+  .user-profile-name { display: none; }
+  .deadlines-grid { grid-template-columns: 1fr; }
+  .deadline-actions { flex-direction: column; align-items: stretch; }
+  .alert-footer { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .alert-footer-actions { width: 100%; justify-content: flex-end; }
+  .doc-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .doc-download-btn { width: 100%; text-align: center; justify-content: center; }
+  .modal-content { padding: 1.5em 1em 1.5em 1em; }
+}
+
+/* Misc */
+::-webkit-scrollbar {width:8px;background: var(--bg);}
+::-webkit-scrollbar-thumb {border-radius:6px;background:var(--gray-light);}
+body.dark ::-webkit-scrollbar {background: var(--bg);}
+body.dark ::-webkit-scrollbar-thumb {background: var(--gray-light);}
+:focus-visible { outline: 2px solid var(--primary);outline-offset: 2px; border-radius: 4px; }
+</style>
+</body>
+</html>
